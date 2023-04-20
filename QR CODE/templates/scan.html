@@ -1,0 +1,22 @@
+{% extends 'layout.html' %}
+{% block body %}
+<h3 class='jumbotron'>Scan Qr</h3>
+<div class='row mt-5'>
+    <div class='col-4 mx-auto'>
+      <h4 class='text-center'></h4><hr>
+      <form action="/check" method='POST' enctype="multipart/form-data">
+        <div class='form-group'>
+          <label>Upload QR</label>
+          <input type='file' name="uploadfile" class='form-control'>  
+        </div>
+        <div class='form-group'>
+          <label>Scan QR</label>
+          <canvas class="draw-area"></canvas>
+          <input type='text' name='filedec' required class='form-control'>  
+        </div>
+        <input type='submit' name='submit' value='Upload' class='btn btn-success'>
+      </form>
+    </div>
+  </div>
+  <script src="script.js"></script>
+{% endblock %}

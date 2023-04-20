@@ -1,0 +1,151 @@
+{% extends 'layout.html' %}
+{% block body %}
+<style>
+  .scanner-window{
+    display: none;
+    width: 400px;
+    height: 400px;
+    position:fixed;
+    background-color: white;
+    overflow-y: scroll;
+    z-index: 3;
+    box-shadow: 2px 2px 5px rgb(202, 197, 197);
+    inset: 50% 50% 50% 50%;
+    transform: translate(-50%,-50%);
+  }
+  .close-btn{
+    width: 40px;
+    height: 40px;
+    font-size: 1.6rem;
+    font-weight: bolder;
+    color: white;
+    font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+    background-color: green;
+    text-align: center;
+    border-radius: 50px;
+    line-height: 35px;
+    margin-left: 85%;
+    cursor:pointer;
+  }
+  canvas{
+    width: 300px;
+    height:200px;
+    margin-left: 20%;
+  }
+  .player{
+    margin-left:50px;
+      }
+</style>
+<h3 class='jumbotron'>View Files</h3>
+<table class='table table-bordered'>
+    <thead>
+      <th>S. No</th>
+      <th>File Name</th>
+      <th>File Description</th>
+      <th>Date / Time</th>
+      <th>Create 2LQR</th>
+      <th>Decode 2LQR and Download File</th>
+    </thead>
+    <tbody>
+      {% for row in datas %}
+        <tr>
+          <td>{{loop.index}}</td>
+          <td>{{row.filename}}</td>
+          <td>{{row.filedec}}</td>
+          <td>{{row.datetime}}</td>
+          <td><a href="/{{row.fileaccesskey}}/userdownloadrequest" class='btn btn-success'>View</a></td>
+          <td><button onclick="displayScanner(this)" class='btn btn-success'>Decode</button></td>
+        </tr>
+      {%endfor%}
+    </tbody>
+  </table>
+
+  <br/> <br/>
+
+  <center>
+      
+    <img width="200" height="200" src="{{ url_for('static', filename=img) }}" />
+    
+</center>
+<div class="scanner-window">
+  <div class="close-btn" >
+    X
+  </div>
+  <div class="player">
+    <video class="screen" width="300px" height="200px" autoplay>
+    </video>
+   <button class="btn btn-success" onclick="Image()">Take Photo</button>
+  </div>
+  <div class="capture">
+  <canvas class="scanner-canvas"></canvas>
+  </div>
+    <h5>OR</h5>
+  <div class="form">
+     <h5>Upload the Image form your storage</h5>
+     <input type="file" value="upload Image" onchange="BlobBuffer(this)"/> 
+  </div>
+</div>
+<script>
+let win =  document.querySelector(".scanner-window")
+let canvas = document.querySelector(".scanner-canvas")  
+  let video = document.querySelector(".screen") 
+async function capture(){
+  win.style.display="block"
+ 
+
+  let capture  =await navigator.mediaDevices.getUserMedia({
+      video:{facingMode:"environment"},
+      audio:false
+    })
+  video.srcObject = capture
+}
+function displayScanner(e){
+       capture()
+}
+let closebtn = document.querySelector(".close-btn")
+let close = function(e){
+  e.target.parentElement.style="display:none;"
+}
+closebtn.addEventListener("click",close)
+function BlobBuffer(e){
+  let blob =new Blob([e.files[0]],{type:"image/jpg"})
+  SubmitImage(blob)
+}
+function SubmitImage(imageBuffer){
+   let form_data = new FormData()
+   form_data.append("file",imageBuffer,'scan.jpg')
+   let fetchdata = async ()=>{
+    let res = (await(await fetch("/check",{
+      method:"POST",
+      body:form_data
+    })).blob())
+    
+    return res
+   } 
+   let data = fetchdata().then((blob)=>{
+    blob.text().then((e)=>{
+      if(e=="500" || e.includes("Access denied"))alert("Access Denied!");
+      else{
+        let url= URL.createObjectURL(blob)
+    let a = document.createElement('a')
+    a.href=url
+    a.download = 'securedfile'
+    a.click()
+      }
+    })
+   
+   })
+}
+function Image(){
+      let context = canvas.getContext("2d")
+      canvas.width = video.videoWidth
+      canvas.height = video.videoHeight
+      context.drawImage(video,0,0,video.videoWidth,video.videoHeight)
+      let blob = canvas.toBlob((blob)=>{
+        SubmitImage(blob)
+      }) 
+      
+      
+}
+</script>
+{% endblock %}

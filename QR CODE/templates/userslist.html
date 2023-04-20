@@ -1,0 +1,25 @@
+
+{% extends 'adminlayout.html' %}
+{% block body %}
+  <h3 class='jumbotron'>Welcome Admin</h3>
+  
+  <table class='table table-bordered'>
+    <thead>
+      <th>SNo</th>
+      <th>Name</th>
+      <th>Email</th>
+      <th>Mobile</th>
+    </thead>
+    <tbody>
+      {% for row in datas %}
+        <tr>
+          <td>{{loop.index}}</td>
+          <td>{{row.UNAME}}</td>
+          <td>{{row.EMAIL}}</td>
+          <td>{{row.MOBILE}}</td>
+        </tr>
+      {%endfor%}
+    </tbody>
+  </table>
+
+{% endblock %}s
